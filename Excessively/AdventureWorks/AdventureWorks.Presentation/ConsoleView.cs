@@ -29,16 +29,27 @@ namespace AdventureWorks.Presentation
 
         public async Task RunAsync()
         {
+            Entry:
             Console.Write("対象のキーを入力してください。例）43659-10：");
             var input = Console.ReadLine()!;
 
             if (_salesOrderDetailKeySerializer.TryDeserialize(input, out var key))
             {
-                var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
-                
-                var salesOrderDetailString = JsonSerializer.Serialize(salesOrderDetail, _jsonSerializerOptions);
-                Console.WriteLine(salesOrderDetailString);
+                await WriteSalesOrderDetail(key);
             }
+            else
+            {
+                Console.WriteLine("キーを読み取れませんでした。");
+                goto Entry;
+            }
+        }
+
+        private async Task WriteSalesOrderDetail(ISalesOrderDetailKey? key)
+        {
+            var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
+
+            var salesOrderDetailString = JsonSerializer.Serialize(salesOrderDetail, _jsonSerializerOptions);
+            Console.WriteLine(salesOrderDetailString);
         }
     }
 }
