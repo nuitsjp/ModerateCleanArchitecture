@@ -4,7 +4,7 @@ namespace AdventureWorks.Presentation
 {
     public class KeyJsonConverterProvider : IKeyJsonConverterProvider
     {
-        public KeyJsonConverterProvider(AdventureWorks.IKeyConverterProvider keyConverterProvider)
+        public KeyJsonConverterProvider(IKeyConverterProvider keyConverterProvider)
         {
             Cache<ISalesOrderDetailKey>.Value = new KeyJsonConverter<ISalesOrderDetailKey>(keyConverterProvider);
         }

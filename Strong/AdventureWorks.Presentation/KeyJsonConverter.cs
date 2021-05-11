@@ -6,9 +6,9 @@ namespace AdventureWorks.Presentation
 {
     public class KeyJsonConverter<TKey> : JsonConverter<TKey>
     {
-        private readonly AdventureWorks.IKeyConverterProvider _keyConverterProvider;
+        private readonly IKeyConverterProvider _keyConverterProvider;
 
-        internal KeyJsonConverter(AdventureWorks.IKeyConverterProvider keyConverterProvider)
+        internal KeyJsonConverter(IKeyConverterProvider keyConverterProvider)
         {
             _keyConverterProvider = keyConverterProvider;
         }

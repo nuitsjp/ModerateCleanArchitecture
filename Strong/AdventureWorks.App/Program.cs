@@ -21,7 +21,7 @@ namespace AdventureWorks.App
             var consoleView =
                 new ConsoleView(
                     new KeyConverterProvider(),
-                    new Presentation.KeyJsonConverterProvider(new KeyConverterProvider()),
+                    new KeyJsonConverterProvider(new KeyConverterProvider()),
                     new SalesOrderDetailRepository(
                         new SqlConnectionFactory(connectionString)));
             await consoleView.RunAsync();

@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Globalization;
-
-namespace AdventureWorks.Repository
+﻿namespace AdventureWorks.Repository
 {
     public class SalesOrderDetailKeyConverter : IKeyConverter<ISalesOrderDetailKey>
     {
