@@ -6,11 +6,11 @@ namespace AdventureWorks.Presentation
 {
     public class KeyConverter<TKey> : JsonConverter<TKey>
     {
-        private readonly IKeySerializerProvider _keySerializerProvider;
+        private readonly AdventureWorks.IKeyConverterProvider _keyConverterProvider;
 
-        internal KeyConverter(IKeySerializerProvider keySerializerProvider)
+        internal KeyConverter(AdventureWorks.IKeyConverterProvider keyConverterProvider)
         {
-            _keySerializerProvider = keySerializerProvider;
+            _keyConverterProvider = keyConverterProvider;
         }
 
         public override TKey Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -20,7 +20,7 @@ namespace AdventureWorks.Presentation
 
         public override void Write(Utf8JsonWriter writer, TKey value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(_keySerializerProvider.Provide<TKey>().Serialize(value));
+            writer.WriteStringValue(_keyConverterProvider.Provide<TKey>().Convert(value));
         }
     }
 }

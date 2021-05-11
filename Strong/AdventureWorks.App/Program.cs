@@ -2,6 +2,7 @@
 using AdventureWorks.Presentation;
 using AdventureWorks.Repository;
 using Microsoft.Data.SqlClient;
+using KeyConverterProvider = AdventureWorks.Repository.KeyConverterProvider;
 
 namespace AdventureWorks.App
 {
@@ -19,8 +20,8 @@ namespace AdventureWorks.App
 
             var consoleView =
                 new ConsoleView(
-                    new KeySerializerProvider(),
-                    new KeyConverterProvider(new KeySerializerProvider()),
+                    new KeyConverterProvider(),
+                    new Presentation.KeyConverterProvider(new KeyConverterProvider()),
                     new SalesOrderDetailRepository(
                         new SqlConnectionFactory(connectionString)));
             await consoleView.RunAsync();

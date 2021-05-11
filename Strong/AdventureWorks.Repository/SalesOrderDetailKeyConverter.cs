@@ -1,8 +1,11 @@
-﻿namespace AdventureWorks.Repository
+﻿using System.ComponentModel;
+using System.Globalization;
+
+namespace AdventureWorks.Repository
 {
-    public class SalesOrderDetailKeySerializer : IKeySerializer<ISalesOrderDetailKey>
+    public class SalesOrderDetailKeyConverter : IKeyConverter<ISalesOrderDetailKey>
     {
-        public bool TryDeserialize(string value, out ISalesOrderDetailKey key)
+        public bool TryConvert(string value, out ISalesOrderDetailKey key)
         {
             try
             {
@@ -19,7 +22,7 @@
             }
         }
 
-        public string Serialize(ISalesOrderDetailKey key)
+        public string Convert(ISalesOrderDetailKey key)
         {
             var internalKey = (SalesOrderDetailKey) key;
             return $"{internalKey.SalesOrderKey.Value}-{internalKey.SalesOrderDetailId}";

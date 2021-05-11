@@ -4,9 +4,9 @@ namespace AdventureWorks.Presentation
 {
     public class KeyConverterProvider : IKeyConverterProvider
     {
-        public KeyConverterProvider(IKeySerializerProvider keySerializerProvider)
+        public KeyConverterProvider(AdventureWorks.IKeyConverterProvider keyConverterProvider)
         {
-            Cache<ISalesOrderDetailKey>.Value = new KeyConverter<ISalesOrderDetailKey>(keySerializerProvider);
+            Cache<ISalesOrderDetailKey>.Value = new KeyConverter<ISalesOrderDetailKey>(keyConverterProvider);
         }
 
         public JsonConverter<TKey> Provide<TKey>()

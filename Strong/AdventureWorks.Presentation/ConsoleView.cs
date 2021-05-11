@@ -6,16 +6,16 @@ namespace AdventureWorks.Presentation
 {
     public class ConsoleView
     {
-        private readonly IKeySerializer<ISalesOrderDetailKey> _salesOrderDetailKeySerializer;
+        private readonly IKeyConverter<ISalesOrderDetailKey> _salesOrderDetailKeyConverter;
         private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
         public ConsoleView(
-            IKeySerializerProvider keySerializerProvider, 
+            AdventureWorks.IKeyConverterProvider keyConverterProvider, 
             IKeyConverterProvider keyConverterProvider,
             ISalesOrderDetailRepository salesOrderDetailRepository)
         {
-            _salesOrderDetailKeySerializer = keySerializerProvider.Provide<ISalesOrderDetailKey>();
+            _salesOrderDetailKeyConverter = keySerializerProvider.Provide<ISalesOrderDetailKey>();
             _salesOrderDetailRepository = salesOrderDetailRepository;
             _jsonSerializerOptions = new JsonSerializerOptions
             {
@@ -40,7 +40,7 @@ namespace AdventureWorks.Presentation
                 Console.Write("対象のキーを入力してください。例）43659-10：");
                 var input = await Console.In.ReadLineAsync()!;
 
-                if (_salesOrderDetailKeySerializer.TryDeserialize(input, out var key))
+                if (_salesOrderDetailKeyConverter.TryConvert(input, out var key))
                 {
                     return key;
                 }
