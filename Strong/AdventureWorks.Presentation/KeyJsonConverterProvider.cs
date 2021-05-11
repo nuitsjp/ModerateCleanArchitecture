@@ -1,15 +1,17 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace AdventureWorks.Presentation
 {
-    public class KeyJsonConverterProvider : IKeyJsonConverterProvider
+    public static class KeyJsonConverterProvider
     {
-        public KeyJsonConverterProvider(IKeyConverterProvider keyConverterProvider)
+        static KeyJsonConverterProvider()
         {
-            Cache<ISalesOrderDetailKey>.Value = new KeyJsonConverter<ISalesOrderDetailKey>(keyConverterProvider);
+            Cache<ISalesOrderDetailKey>.Value = new KeyJsonConverter<ISalesOrderDetailKey>();
         }
 
-        public JsonConverter<TKey> Provide<TKey>()
+        public static JsonConverter<TKey> Provide<TKey>()
         {
             return Cache<TKey>.Value;
         }

@@ -7,19 +7,10 @@ namespace AdventureWorks.Presentation
     public class ConsoleView
     {
         private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
-        private readonly JsonSerializerOptions _jsonSerializerOptions;
 
         public ConsoleView(ISalesOrderDetailRepository salesOrderDetailRepository)
         {
             _salesOrderDetailRepository = salesOrderDetailRepository;
-            _jsonSerializerOptions = new JsonSerializerOptions
-            {
-                Converters =
-                {
-                    new SalesOrderDetailKeyConverter()
-                },
-                WriteIndented = true
-            };
         }
 
         public async Task RunAsync()
@@ -48,7 +39,17 @@ namespace AdventureWorks.Presentation
         {
             var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
 
-            var salesOrderDetailString = JsonSerializer.Serialize(salesOrderDetail, _jsonSerializerOptions);
+            var salesOrderDetailString =
+                JsonSerializer.Serialize(
+                    salesOrderDetail,
+                    new JsonSerializerOptions
+                    {
+                        Converters =
+                        {
+                            new SalesOrderDetailKeyConverter()
+                        },
+                        WriteIndented = true
+                    });
             Console.WriteLine(salesOrderDetailString);
         }
     }

@@ -6,25 +6,11 @@ namespace AdventureWorks.Presentation
 {
     public class ConsoleView
     {
-        private readonly IKeyConverter<ISalesOrderDetailKey> _salesOrderDetailKeyConverter;
         private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
-        private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public ConsoleView(
-            IKeyConverterProvider keyConverterProvider, 
-            IKeyJsonConverterProvider keyJsonConverterProvider,
-            ISalesOrderDetailRepository salesOrderDetailRepository)
+        public ConsoleView(ISalesOrderDetailRepository salesOrderDetailRepository)
         {
-            _salesOrderDetailKeyConverter = keyConverterProvider.Provide<ISalesOrderDetailKey>();
             _salesOrderDetailRepository = salesOrderDetailRepository;
-            _jsonSerializerOptions = new JsonSerializerOptions
-            {
-                Converters =
-                {
-                    keyJsonConverterProvider.Provide<ISalesOrderDetailKey>()
-                },
-                WriteIndented = true
-            };
         }
 
         public async Task RunAsync()
@@ -40,7 +26,7 @@ namespace AdventureWorks.Presentation
                 Console.Write("対象のキーを入力してください。例）43659-10：");
                 var input = await Console.In.ReadLineAsync()!;
 
-                if (_salesOrderDetailKeyConverter.TryConvert(input, out var key))
+                if (KeyConverterProvider.Provide<ISalesOrderDetailKey>().TryConvert(input, out var key))
                 {
                     return key;
                 }
@@ -53,7 +39,17 @@ namespace AdventureWorks.Presentation
         {
             var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
 
-            var salesOrderDetailString = JsonSerializer.Serialize(salesOrderDetail, _jsonSerializerOptions);
+            var salesOrderDetailString =
+                JsonSerializer.Serialize(
+                    salesOrderDetail,
+                    new JsonSerializerOptions
+                    {
+                        Converters =
+                        {
+                            KeyJsonConverterProvider.Provide<ISalesOrderDetailKey>()
+                        },
+                        WriteIndented = true
+                    });
             Console.WriteLine(salesOrderDetailString);
         }
     }
