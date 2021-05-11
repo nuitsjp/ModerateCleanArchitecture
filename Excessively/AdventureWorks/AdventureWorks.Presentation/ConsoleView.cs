@@ -44,7 +44,7 @@ namespace AdventureWorks.Presentation
             }
         }
 
-        private async Task WriteSalesOrderDetail(ISalesOrderDetailKey? key)
+        private async Task WriteSalesOrderDetail(ISalesOrderDetailKey key)
         {
             var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
 
