@@ -31,7 +31,7 @@ namespace AdventureWorks.Presentation
         {
             Entry:
             Console.Write("対象のキーを入力してください。例）43659-10：");
-            var input = Console.ReadLine()!;
+            var input = await Console.In.ReadLineAsync()!;
 
             if (_salesOrderDetailKeySerializer.TryDeserialize(input, out var key))
             {
@@ -39,7 +39,7 @@ namespace AdventureWorks.Presentation
             }
             else
             {
-                Console.WriteLine("キーを読み取れませんでした。");
+                await Console.Out.WriteLineAsync("キーを読み取れませんでした。");
                 goto Entry;
             }
         }
