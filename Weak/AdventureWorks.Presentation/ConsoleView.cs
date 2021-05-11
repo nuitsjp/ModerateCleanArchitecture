@@ -24,19 +24,24 @@ namespace AdventureWorks.Presentation
 
         public async Task RunAsync()
         {
-            Entry:
-            Console.Write("対象のキーを入力してください。例）43659-10：");
-            var input = await Console.In.ReadLineAsync()!;
+            var salesOrderDetailKey = await ReadSalesOrderDetailKeyAsync();
+            await WriteSalesOrderDetail(salesOrderDetailKey);
+        }
 
-            if (SalesOrderDetailKey.TryParse(input, out var key))
+        private async Task<SalesOrderDetailKey> ReadSalesOrderDetailKeyAsync()
+        {
+            do
             {
-                await WriteSalesOrderDetail(key);
-            }
-            else
-            {
+                Console.Write("対象のキーを入力してください。例）43659-10：");
+                var input = await Console.In.ReadLineAsync()!;
+
+                if (SalesOrderDetailKey.TryParse(input, out var key))
+                {
+                    return key;
+                }
+
                 await Console.Out.WriteLineAsync("キーを読み取れませんでした。");
-                goto Entry;
-            }
+            } while (true);
         }
 
         private async Task WriteSalesOrderDetail(SalesOrderDetailKey key)
