@@ -11,17 +11,17 @@ namespace AdventureWorks.Presentation
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
         public ConsoleView(
-            AdventureWorks.IKeyConverterProvider keyConverterProvider, 
-            IKeyConverterProvider keyConverterProvider,
+            IKeyConverterProvider keyConverterProvider, 
+            IKeyJsonConverterProvider keyJsonConverterProvider,
             ISalesOrderDetailRepository salesOrderDetailRepository)
         {
-            _salesOrderDetailKeyConverter = keySerializerProvider.Provide<ISalesOrderDetailKey>();
+            _salesOrderDetailKeyConverter = keyConverterProvider.Provide<ISalesOrderDetailKey>();
             _salesOrderDetailRepository = salesOrderDetailRepository;
             _jsonSerializerOptions = new JsonSerializerOptions
             {
                 Converters =
                 {
-                    keyConverterProvider.Provide<ISalesOrderDetailKey>()
+                    keyJsonConverterProvider.Provide<ISalesOrderDetailKey>()
                 },
                 WriteIndented = true
             };

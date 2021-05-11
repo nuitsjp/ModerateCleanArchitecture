@@ -4,11 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace AdventureWorks.Presentation
 {
-    public class KeyConverter<TKey> : JsonConverter<TKey>
+    public class KeyJsonConverter<TKey> : JsonConverter<TKey>
     {
         private readonly AdventureWorks.IKeyConverterProvider _keyConverterProvider;
 
-        internal KeyConverter(AdventureWorks.IKeyConverterProvider keyConverterProvider)
+        internal KeyJsonConverter(AdventureWorks.IKeyConverterProvider keyConverterProvider)
         {
             _keyConverterProvider = keyConverterProvider;
         }

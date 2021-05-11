@@ -2,7 +2,7 @@
 
 namespace AdventureWorks.Presentation
 {
-    public interface IKeyConverterProvider
+    public interface IKeyJsonConverterProvider
     {
         JsonConverter<TKey> Provide<TKey>();
     }

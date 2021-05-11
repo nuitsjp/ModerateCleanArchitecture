@@ -2,11 +2,11 @@
 
 namespace AdventureWorks.Presentation
 {
-    public class KeyConverterProvider : IKeyConverterProvider
+    public class KeyJsonConverterProvider : IKeyJsonConverterProvider
     {
-        public KeyConverterProvider(AdventureWorks.IKeyConverterProvider keyConverterProvider)
+        public KeyJsonConverterProvider(AdventureWorks.IKeyConverterProvider keyConverterProvider)
         {
-            Cache<ISalesOrderDetailKey>.Value = new KeyConverter<ISalesOrderDetailKey>(keyConverterProvider);
+            Cache<ISalesOrderDetailKey>.Value = new KeyJsonConverter<ISalesOrderDetailKey>(keyConverterProvider);
         }
 
         public JsonConverter<TKey> Provide<TKey>()
