@@ -6,22 +6,17 @@ namespace AdventureWorks.Presentation
 {
     public class ConsoleView
     {
-        private readonly IKeySerializer<ISalesOrderDetailKey> _salesOrderDetailKeySerializer;
         private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public ConsoleView(
-            IKeySerializerProvider keySerializerProvider, 
-            IKeyConverterProvider keyConverterProvider,
-            ISalesOrderDetailRepository salesOrderDetailRepository)
+        public ConsoleView(ISalesOrderDetailRepository salesOrderDetailRepository)
         {
-            _salesOrderDetailKeySerializer = keySerializerProvider.Provide<ISalesOrderDetailKey>();
             _salesOrderDetailRepository = salesOrderDetailRepository;
             _jsonSerializerOptions = new JsonSerializerOptions
             {
                 Converters =
                 {
-                    keyConverterProvider.Provide<ISalesOrderDetailKey>()
+                    new SalesOrderDetailKeyConverter()
                 },
                 WriteIndented = true
             };
@@ -33,7 +28,7 @@ namespace AdventureWorks.Presentation
             Console.Write("対象のキーを入力してください。例）43659-10：");
             var input = await Console.In.ReadLineAsync()!;
 
-            if (_salesOrderDetailKeySerializer.TryDeserialize(input, out var key))
+            if (SalesOrderDetailKey.TryParse(input, out var key))
             {
                 await WriteSalesOrderDetail(key);
             }
@@ -44,7 +39,7 @@ namespace AdventureWorks.Presentation
             }
         }
 
-        private async Task WriteSalesOrderDetail(ISalesOrderDetailKey key)
+        private async Task WriteSalesOrderDetail(SalesOrderDetailKey key)
         {
             var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
 

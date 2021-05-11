@@ -1,6 +1,6 @@
 ﻿namespace AdventureWorks.Repository
 {
-    public class SalesOrderDetailKeySerializer : ISalesOrderDetailKeySerializer
+    public class SalesOrderDetailKeySerializer : IKeySerializer<ISalesOrderDetailKey>
     {
         public bool TryDeserialize(string value, out ISalesOrderDetailKey key)
         {

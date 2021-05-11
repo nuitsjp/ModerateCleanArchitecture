@@ -19,8 +19,6 @@ namespace AdventureWorks.App
 
             var consoleView =
                 new ConsoleView(
-                    new KeySerializerProvider(),
-                    new KeyConverterProvider(new KeySerializerProvider()),
                     new SalesOrderDetailRepository(
                         new SqlConnectionFactory(connectionString)));
             await consoleView.RunAsync();
