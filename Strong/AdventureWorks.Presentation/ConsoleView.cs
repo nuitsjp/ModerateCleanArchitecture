@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace AdventureWorks.Presentation
 {
-    public class ConsoleView
+    public class ConsoleView : IHostedService
     {
         private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
 
@@ -51,6 +53,17 @@ namespace AdventureWorks.Presentation
                         WriteIndented = true
                     });
             Console.WriteLine(salesOrderDetailString);
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            var salesOrderDetailKey = await ReadSalesOrderDetailKeyAsync();
+            await WriteSalesOrderDetail(salesOrderDetailKey);
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }
