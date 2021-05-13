@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using AdventureWorks.Presentation;
+﻿using AdventureWorks.Presentation;
 using AdventureWorks.Repository;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,16 +6,15 @@ using Microsoft.Extensions.Hosting;
 
 namespace AdventureWorks.App
 {
-    class Program
+    static class Program
     {
         static void Main()
         {
             CreateHostBuilder()
-                .Build()
-                .Run();
+                .RunConsoleAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder() =>
+        static IHostBuilder CreateHostBuilder() =>
             Host.CreateDefaultBuilder()
                 .ConfigureServices((hostContext, services) =>
                 {
