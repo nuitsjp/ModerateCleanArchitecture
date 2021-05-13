@@ -8,7 +8,7 @@ namespace AdventureWorks.Repository
         [ModuleInitializer]
         public static void Initialize()
         {
-            KeyConverterProvider.Register(new SalesOrderDetailKeyConverter());
+            KeyConverterProvider.Register(new SalesOrderDetailKey.SalesOrderDetailKeyConverter());
         }
     }
 }
