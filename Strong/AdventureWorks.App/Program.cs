@@ -1,24 +1,26 @@
 ﻿using AdventureWorks.Presentation;
 using AdventureWorks.Repository;
+using AdventureWorks.UseCase.Export;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace AdventureWorks.App
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        private static void Main()
         {
             CreateHostBuilder()
                 .RunConsoleAsync();
         }
 
-        static IHostBuilder CreateHostBuilder() =>
+        private static IHostBuilder CreateHostBuilder() =>
             Host.CreateDefaultBuilder()
-                .ConfigureServices((hostContext, services) =>
+                .ConfigureServices((_, services) =>
                 {
                     services.AddHostedService<ConsoleView>();
+                    services.AddTransient<IExportService, ExportService>();
                     services.AddTransient<ISalesOrderDetailRepository, SalesOrderDetailRepository>();
                     services.AddTransient<IDbConnectionFactory>(_ =>
                         new SqlConnectionFactory(

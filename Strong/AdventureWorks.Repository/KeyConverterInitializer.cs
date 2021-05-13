@@ -2,6 +2,7 @@
 
 namespace AdventureWorks.Repository
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class KeyConverterInitializer
     {
         [ModuleInitializer]

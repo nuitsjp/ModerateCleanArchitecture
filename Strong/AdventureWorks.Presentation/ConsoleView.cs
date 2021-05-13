@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using AdventureWorks.UseCase.Export;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace AdventureWorks.Presentation
 {
-    public class ConsoleView : BackgroundService 
+    public class ConsoleView : BackgroundService
     {
-        private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
+        private readonly IExportService _exportService;
 
         private readonly ILogger<ConsoleView> _logger;
 
-        public ConsoleView(ISalesOrderDetailRepository salesOrderDetailRepository, ILogger<ConsoleView> logger)
+        public ConsoleView(IExportService exportService, ILogger<ConsoleView> logger)
         {
-            _salesOrderDetailRepository = salesOrderDetailRepository;
+            _exportService = exportService;
             _logger = logger;
         }
 
@@ -26,11 +26,11 @@ namespace AdventureWorks.Presentation
             await WriteSalesOrderDetail(salesOrderDetailKey);
         }
 
-        private async Task<ISalesOrderDetailKey> ReadSalesOrderDetailKeyAsync()
+        private static async Task<ISalesOrderDetailKey> ReadSalesOrderDetailKeyAsync()
         {
             do
             {
-                Console.Write("対象のキーを入力してください。例）43659-10：");
+                await Console.Out.WriteAsync("対象のキーを入力してください。例）43659-10：");
                 var input = await Console.In.ReadLineAsync()!;
 
                 if (KeyConverterProvider.Provide<ISalesOrderDetailKey>().TryConvert(input, out var key))
@@ -42,22 +42,9 @@ namespace AdventureWorks.Presentation
             } while (true);
         }
 
-        private async Task WriteSalesOrderDetail(ISalesOrderDetailKey key)
+        private Task WriteSalesOrderDetail(ISalesOrderDetailKey key)
         {
-            var salesOrderDetail = await _salesOrderDetailRepository.GetSalesOrderDetailAsync(key);
-
-            var salesOrderDetailString =
-                JsonSerializer.Serialize(
-                    salesOrderDetail,
-                    new JsonSerializerOptions
-                    {
-                        Converters =
-                        {
-                            KeyJsonConverterProvider.Provide<ISalesOrderDetailKey>()
-                        },
-                        WriteIndented = true
-                    });
-            Console.WriteLine(salesOrderDetailString);
+            return _exportService.ExportAsync(key, Console.Out);
         }
     }
 }
