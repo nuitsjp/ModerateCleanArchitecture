@@ -11,5 +11,7 @@
         internal SalesOrderKey SalesOrderKey { get; }
 
         internal int SalesOrderDetailId { get; }
+
+        public override string ToString() => $"{SalesOrderKey}-{SalesOrderDetailId}";
     }
 }

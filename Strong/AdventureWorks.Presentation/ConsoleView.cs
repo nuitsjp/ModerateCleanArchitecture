@@ -3,25 +3,30 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace AdventureWorks.Presentation
 {
-    public class ConsoleView : IHostedService
+    public class ConsoleView : BackgroundService 
     {
         private readonly ISalesOrderDetailRepository _salesOrderDetailRepository;
 
-        public ConsoleView(ISalesOrderDetailRepository salesOrderDetailRepository)
+        private readonly ILogger<ConsoleView> _logger;
+
+        public ConsoleView(ISalesOrderDetailRepository salesOrderDetailRepository, ILogger<ConsoleView> logger)
         {
             _salesOrderDetailRepository = salesOrderDetailRepository;
+            _logger = logger;
         }
 
-        public async Task RunAsync()
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var salesOrderDetailKey = await ReadSalesOrderDetailKeyAsync();
+            _logger.LogInformation("salesOrderDetailKey:{0}", salesOrderDetailKey);
             await WriteSalesOrderDetail(salesOrderDetailKey);
         }
 
-        public async Task<ISalesOrderDetailKey> ReadSalesOrderDetailKeyAsync()
+        private async Task<ISalesOrderDetailKey> ReadSalesOrderDetailKeyAsync()
         {
             do
             {
@@ -53,17 +58,6 @@ namespace AdventureWorks.Presentation
                         WriteIndented = true
                     });
             Console.WriteLine(salesOrderDetailString);
-        }
-
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            var salesOrderDetailKey = await ReadSalesOrderDetailKeyAsync();
-            await WriteSalesOrderDetail(salesOrderDetailKey);
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }

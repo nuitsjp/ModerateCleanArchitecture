@@ -19,10 +19,6 @@
             }
         }
 
-        public string Convert(ISalesOrderDetailKey key)
-        {
-            var internalKey = (SalesOrderDetailKey) key;
-            return $"{internalKey.SalesOrderKey.Value}-{internalKey.SalesOrderDetailId}";
-        }
+        public string Convert(ISalesOrderDetailKey key) => key.ToString();
     }
 }
