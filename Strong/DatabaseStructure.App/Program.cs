@@ -50,30 +50,21 @@ namespace DatabaseStructure.App
 
     public class PrimaryKeyColumn
     {
-        public PrimaryKeyColumn(string columnName, Type columnType, Column? referenceColumn, Type? referenceColumnType)
+        public PrimaryKeyColumn(Column parentColumn, Column? referenceColumn)
         {
-            ColumnName = columnName;
-            ColumnType = columnType;
+            ParentColumn = parentColumn;
             ReferenceColumn = referenceColumn;
-            ReferenceColumnType = referenceColumnType;
         }
 
-        public string ColumnName { get; }
-
-        public Type ColumnType { get; }
-
-        public bool HasForeignKeyColumn => ReferenceColumn is not null;
-
+        public Column ParentColumn { get; set; }
         public Column? ReferenceColumn { get; }
 
-        public Type? ReferenceColumnType { get; }
-
-        public override string ToString() => ColumnName;
+        public override string ToString() => ParentColumn.ColumnName;
     }
 
     public class Column
     {
-        public Column(string tableName, string columnName, string dataType)
+        public Column(string tableName, string columnName, Type dataType)
         {
             TableName = tableName;
             ColumnName = columnName;
@@ -82,7 +73,7 @@ namespace DatabaseStructure.App
 
         public string TableName { get; }
         public string ColumnName { get; }
-        public string DataType { get; }
+        public Type DataType { get; }
     }
 
     public class DataType
@@ -101,18 +92,14 @@ namespace DatabaseStructure.App
 
     public class ForeignKeyColumn
     {
-        public ForeignKeyColumn(string parentTableName, string parentColumnName, string referenceTableName, string referenceColumnName)
+        public ForeignKeyColumn(Column parentColumn, Column referenceColumn)
         {
-            ParentTableName = parentTableName;
-            ParentColumnName = parentColumnName;
-            ReferenceTableName = referenceTableName;
-            ReferenceColumnName = referenceColumnName;
+            ParentColumn = parentColumn;
+            ReferenceColumn = referenceColumn;
         }
 
-        public string ParentTableName { get; }
-        public string ParentColumnName { get; }
-        public string ReferenceTableName { get; }
-        public string ReferenceColumnName { get; }
+        public Column ParentColumn { get; }
+        public Column ReferenceColumn { get; }
     }
 
     public static class DatabaseStructureExtensions
@@ -132,7 +119,8 @@ namespace DatabaseStructure.App
                 .ToDictionary(
                     x => x.Name,
                     x => x)
-                .AddWith("hierarchyid", new DataType("hierarchyid", false, typeof(SqlHierarchyId)));
+                .AddWith("hierarchyid", new DataType("hierarchyid", false, typeof(SqlHierarchyId)))
+                .AddWith("geography", new DataType("geography", false, typeof(SqlGeography)));
         }
 
         public static DataType GetDataType(this DbConnection connection, string typeName) =>
@@ -146,7 +134,7 @@ namespace DatabaseStructure.App
                 .Select(x => new Column(
                     $"[{x.TABLE_SCHEMA}].[{x.TABLE_NAME}]",
                     x.COLUMN_NAME,
-                    x.DATA_TYPE))
+                    GetDataType(connection, (string)x.DATA_TYPE).Type))
                 .ToDictionary(
                     x => (x.TableName, x.ColumnName),
                     x => x);
@@ -154,20 +142,6 @@ namespace DatabaseStructure.App
 
         public static Column GetColumn(this DbConnection connection, string tableName, string columnName) =>
             connection.GetColumns()[(tableName, columnName)];
-
-        public static IEnumerable<string> GetTableNames(this DbConnection connection)
-        {
-            return connection.GetSchema("Tables")
-                .Select()
-                .Where(x => (string) x["TABLE_TYPE"] == "BASE TABLE")
-                .Select(x => $"[{x["TABLE_SCHEMA"]}].[{x["TABLE_NAME"]}]");
-        }
-
-        public static Type GetColumnType(this DbConnection connection, string tableName, string columnName)
-        {
-            var column = connection.GetColumn(tableName, columnName);
-            return connection.GetDataType(column.DataType).Type;
-        }
 
         private static Dictionary<(string, string), ForeignKeyColumn>? _foreignKeyColumns;
         public static Dictionary<(string, string), ForeignKeyColumn> GetForeignKeyColumns(this DbConnection connection)
@@ -201,12 +175,10 @@ order by
 	ParentTableName,
 	ParentColumnName")
                 .Select(x => new ForeignKeyColumn(
-                    x.ParentTableName, 
-                    x.ParentColumnName,
-                    x.ReferenceTableName, 
-                    x.ReferenceColumnName))
+                    connection.GetColumn((string)x.ParentTableName, (string)x.ParentColumnName),
+                    connection.GetColumn((string)x.ReferenceTableName, (string)x.ReferenceColumnName)))
                 .ToDictionary(
-                    x => (x.ParentTableName, x.ParentColumnName),
+                    x => (x.ParentColumn.TableName, x.ParentColumn.ColumnName),
                     x => x);
         }
 
@@ -222,9 +194,7 @@ order by
 
         public static IEnumerable<Table> GetTables(this DbConnection connection)
         {
-            try
-            {
-                return connection.Query(@"
+            return connection.Query(@"
 select
 	'[' + schemas.name + '].[' + Tables.name + ']' as TableName,
 	index_columns.key_ordinal as KeyOrdinal,
@@ -245,71 +215,29 @@ from
 order by
 	TableName, 
 	KeyOrdinal")
-                    .GroupBy(
-                        x => (string)x.TableName,
-                        x => (ColumnName:(string)x.ColumnName, KeyOrdinal:(int)x.KeyOrdinal))
-                    .Select(x =>
-                    {
-                        var tableName = x.Key;
-                        var columns = x.OrderBy(column => column.KeyOrdinal).ToList();
-                        return new Table(
-                            tableName,
-                            columns
-                                .Select(c =>
-                                {
-                                    var foreignKeyColumn = connection.GetForeignKeyColumn(tableName, c.ColumnName);
-                                    if (foreignKeyColumn is null)
-                                    {
-                                        return new PrimaryKeyColumn(
-                                            c.ColumnName,
-                                            connection.GetColumnType(tableName, c.ColumnName),
-                                            null,
-                                            null);
-                                    }
-                                    else
-                                    {
-                                        var column = connection.GetColumn(foreignKeyColumn.ReferenceTableName, foreignKeyColumn.ReferenceColumnName);
-                                        var columnType = connection.GetDataType(column.DataType).Type;
-                                        return new PrimaryKeyColumn(
-                                            column.ColumnName,
-                                            connection.GetColumnType(tableName, c.ColumnName),
-                                            column,
-                                            columnType);
-                                    }
-                                })
-                                .ToArray());
-                    });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
+                .GroupBy(
+                    x => (string)x.TableName,
+                    x => (ColumnName: (string)x.ColumnName, KeyOrdinal: (int)x.KeyOrdinal))
+                .Select(x =>
+                {
+                    var tableName = x.Key;
+                    var columns = x.OrderBy(column => column.KeyOrdinal).ToList();
+                    return new Table(
+                        tableName,
+                        columns
+                            .OrderBy(c => c.KeyOrdinal)
+                            .Select(c => new PrimaryKeyColumn(
+                                connection.GetColumn(tableName, c.ColumnName),
+                                connection.GetForeignKeyColumn(tableName, c.ColumnName)?.ReferenceColumn))
+                            .ToArray());
+                });
         }
-
-        public static void GetColumnType(this DbConnection connection)
-        {
-            var providerFactory = DbProviderFactories.GetFactory(connection)!;
-            var command = connection.CreateCommand();
-            command.CommandText = "select * from [Purchasing].[ProductVendor]";
-
-            var dataAdapter = providerFactory.CreateDataAdapter()!;
-            dataAdapter.SelectCommand = command;
-            dataAdapter.MissingSchemaAction = MissingSchemaAction.AddWithKey;
-
-            var dataSet = new DataSet();
-            dataAdapter.Fill(dataSet);
-
-            var dataTable = dataSet.Tables[0];
-
-        }
-
 
         public static IEnumerable<dynamic> AsDynamic(this DataTable table)
         {
             return table.AsEnumerable().Select(x =>
             {
-                IDictionary<string, object> dict = new ExpandoObject()!;
+                IDictionary<string, object?> dict = new ExpandoObject()!;
                 foreach (DataColumn column in x.Table.Columns)
                 {
                     var value = x[column];
