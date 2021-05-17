@@ -224,7 +224,8 @@ order by
         {
             try
             {
-                return connection.Query(@"select
+                return connection.Query(@"
+select
 	'[' + schemas.name + '].[' + Tables.name + ']' as TableName,
 	index_columns.key_ordinal as KeyOrdinal,
 	columns.name AS ColumnName
